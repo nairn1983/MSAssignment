@@ -1,6 +1,5 @@
 package nmc.assignments.msassignment.controller.file;
 
-import io.swagger.v3.oas.annotations.Parameter;
 import nmc.assignments.msassignment.entity.FileInformation;
 import nmc.assignments.msassignment.service.FileUploadService;
 import org.apache.logging.log4j.LogManager;

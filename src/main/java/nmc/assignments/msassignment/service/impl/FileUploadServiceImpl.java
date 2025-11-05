@@ -52,7 +52,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
         try (final InputStream inputStream = file.getInputStream()) {
             logger.debug("Copying file {} to {}", originalFilename, fullRelativePath);
-            Files.copy(file.getInputStream(), path);
+            Files.copy(inputStream, path);
         }
 
         final FileInformation fileInformation = createFileInformation(path);
