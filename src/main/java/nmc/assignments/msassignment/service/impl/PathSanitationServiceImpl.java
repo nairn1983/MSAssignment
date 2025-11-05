@@ -12,21 +12,21 @@ public class PathSanitationServiceImpl implements PathSanitationService {
     private static final Logger logger = LogManager.getLogger(PathSanitationServiceImpl.class);
 
     @Override
-    public Path sanitiseFile(final String filename) {
-        final Path fullPath = Paths.get(filename);
+    public Path sanitiseFile(final String absolutePath, final String relativePath) {
+        final Path fullPath = Paths.get(absolutePath);
 
         if (Files.isDirectory(fullPath)) {
-            final IllegalArgumentException exc = new IllegalArgumentException("The path " + filename + " is a directory.");
+            final IllegalArgumentException exc = new IllegalArgumentException("The path " + relativePath + " is a directory.");
             throw logger.throwing(exc);
         }
 
         if (!Files.exists(fullPath)) {
-            final IllegalArgumentException exc = new IllegalArgumentException("The file " + filename + " does not exist.");
+            final IllegalArgumentException exc = new IllegalArgumentException("The file " + relativePath + " does not exist.");
             throw logger.throwing(exc);
         }
 
         if (!Files.isRegularFile(fullPath)) {
-            final IllegalArgumentException exc = new IllegalArgumentException("The location " + filename + " is not a regular file.");
+            final IllegalArgumentException exc = new IllegalArgumentException("The location " + relativePath + " is not a regular file.");
             throw logger.throwing(exc);
         }
         return fullPath;
@@ -34,10 +34,7 @@ public class PathSanitationServiceImpl implements PathSanitationService {
 
     @Override
     public String sanitisePath(final String absolutePath) {
-        // Convert system-specific directory separators
-        final String replacedPath = absolutePath.replace("\\", "/");
-
-        final Path path = Paths.get(replacedPath);
+        final Path path = Paths.get(absolutePath);
         final Path normalisedPath = path.normalize();
 
         final String pathString = path.toString();
@@ -48,7 +45,8 @@ public class PathSanitationServiceImpl implements PathSanitationService {
             throw logger.throwing(exc);
         }
 
-        return pathString;
+        // Convert system-specific directory separators before returning
+        return pathString.replace("\\", "/");
     }
 
     @Override

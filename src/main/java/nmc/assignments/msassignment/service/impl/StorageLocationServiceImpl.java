@@ -34,6 +34,12 @@ public class StorageLocationServiceImpl implements StorageLocationService {
     }
 
     @Override
+    public String getRelativePath(final String absolutePath) {
+        final String sanitisedAbsolutePath = pathSanitationService.sanitisePath(absolutePath);
+        return sanitisedAbsolutePath.replace(getStorageLocationString() + "/", "");
+    }
+
+    @Override
     public Path getStorageLocationPath() {
         return Paths.get(getStorageLocationString());
     }

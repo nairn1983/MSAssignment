@@ -19,6 +19,6 @@ public class FileDownloadServiceImpl implements FileDownloadService {
     @Override
     public Path resolveFilename(final String filename) {
         final String fullPathFilename = storageLocationService.getAbsolutePath(filename);
-        return pathSanitationService.sanitiseFile(fullPathFilename);
+        return pathSanitationService.sanitiseFile(fullPathFilename, filename);
     }
 }

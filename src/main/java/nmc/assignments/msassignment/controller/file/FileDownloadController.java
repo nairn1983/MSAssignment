@@ -7,7 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.server.WebServerException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.http.*;
+import org.springframework.http.CacheControl;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,12 +32,14 @@ public class FileDownloadController {
 
     @GetMapping(ENDPOINTS_ROOT + "/download/{*filepath}")
     public ResponseEntity<?> downloadFile(@PathVariable final String filepath) {
+        final String relativePath = filepath.startsWith("/") ? filepath.substring(1) : filepath;
+        logger.info("Downloading file {}", relativePath);
+
         try {
-            logger.info("Downloading file {}", filepath);
-            final Path path = fileDownloadService.resolveFilename(filepath);
+            final Path path = fileDownloadService.resolveFilename(relativePath);
             final Resource resource = new UrlResource(path.toUri());
             if (!resource.exists() || !resource.isReadable()) {
-                logger.warn("File {} does not exist or is not readable", filepath);
+                logger.warn("File {} does not exist or is not readable", relativePath);
                 return ResponseEntity.notFound().build();
             }
 
@@ -46,7 +53,7 @@ public class FileDownloadController {
             final String filename = path.getFileName().toString();
             final long fileSize = Files.size(path);
 
-            logger.info("Ready to download file {}", filepath);
+            logger.info("Ready to download file {}", relativePath);
             return ResponseEntity.ok()
                 .cacheControl(CacheControl.noCache())
                 .contentLength(fileSize)
@@ -60,7 +67,7 @@ public class FileDownloadController {
 
         } catch (final IOException e) {
             logger.catching(e);
-            final WebServerException exc = new WebServerException("Received I/O exception when downloading file " + filepath, e);
+            final WebServerException exc = new WebServerException("Received I/O exception when downloading file " + relativePath, e);
             throw logger.throwing(exc);
 
         } catch (final IllegalArgumentException e) {

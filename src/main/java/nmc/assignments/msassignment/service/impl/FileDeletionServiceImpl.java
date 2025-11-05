@@ -24,12 +24,13 @@ public class FileDeletionServiceImpl implements FileDeletionService {
 
     @Override
     public void deleteFile(final String filename) throws IOException {
-        logger.info("Deleting file: {}", filename);
+        final String relativePath = filename.startsWith("/") ? filename.substring(1) : filename;
+        logger.info("Deleting file: {}", relativePath);
 
-        final String fullPathFilename = storageLocationService.getAbsolutePath(filename);
-        final Path fullPath = pathSanitationService.sanitiseFile(fullPathFilename);
+        final String fullPathFilename = storageLocationService.getAbsolutePath(relativePath);
+        final Path fullPath = pathSanitationService.sanitiseFile(fullPathFilename, relativePath);
 
         Files.delete(fullPath);
-        logger.info("Deleted file: {}", filename);
+        logger.info("Deleted file: {}", relativePath);
     }
 }
