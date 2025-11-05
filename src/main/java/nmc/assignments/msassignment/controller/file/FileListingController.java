@@ -20,7 +20,7 @@ public class FileListingController {
     @GetMapping(ENDPOINTS_ROOT + "/list")
     public ResponseEntity<List<String>> listAllFiles() {
         try {
-            return new ResponseEntity<>(fileListingService.listAllFiles(),  HttpStatus.OK);
+            return new ResponseEntity<>(fileListingService.listAllFiles(), HttpStatus.OK);
 
         } catch (final Exception e) {
             throw new WebServerException("Failed to list contents of storage directory. An I/O error occurred: " + e.getMessage(), e);

@@ -4,8 +4,6 @@ management:
       exposure:
         include: health,info,metrics
 
-      file-services-root: /file
-
 server:
   port: 8080
 

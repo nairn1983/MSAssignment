@@ -2,6 +2,8 @@ package nmc.assignments.msassignment.service.impl;
 
 import nmc.assignments.msassignment.service.PathSanitationService;
 import nmc.assignments.msassignment.service.StorageLocationService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -11,6 +13,8 @@ import java.nio.file.Paths;
 
 @Service
 public class StorageLocationServiceImpl implements StorageLocationService {
+    private static final Logger logger = LogManager.getLogger(StorageLocationServiceImpl.class);
+
     @Value("${storage.location}")
     private String storageLocation;
 
@@ -21,7 +25,12 @@ public class StorageLocationServiceImpl implements StorageLocationService {
 
     @Override
     public String getAbsolutePath(final String relativePath) {
-        return pathSanitationService.sanitisePath(getStorageLocationString() + "/" + relativePath);
+        final String absolutePath = pathSanitationService.sanitisePath(getStorageLocationString() + "/" + relativePath);
+        if (!absolutePath.startsWith(storageLocationAbsolutePath)) {
+            final IllegalArgumentException exc = new IllegalArgumentException("The relative path is above the root storage directory. Path traversals outside of this domain are not allowed.");
+            logger.throwing(exc);
+        }
+        return absolutePath;
     }
 
     @Override

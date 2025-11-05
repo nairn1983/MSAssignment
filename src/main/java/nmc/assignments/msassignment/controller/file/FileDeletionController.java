@@ -23,7 +23,7 @@ public class FileDeletionController {
     private FileDeletionService fileDeletionService;
 
     @DeleteMapping(ENDPOINTS_ROOT + "/delete/{*filepath}")
-    public ResponseEntity<?> deleteFile(@PathVariable final String filepath){
+    public ResponseEntity<?> deleteFile(@PathVariable final String filepath) {
         try {
             fileDeletionService.deleteFile(filepath);
             return new ResponseEntity<>(null, HttpStatus.OK);
