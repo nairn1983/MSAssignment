@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -41,7 +43,17 @@ public class StorageLocationServiceImpl implements StorageLocationService {
 
     @Override
     public Path getStorageLocationPath() {
-        return Paths.get(getStorageLocationString());
+        final Path path = Paths.get(getStorageLocationString());
+        if (!Files.exists(path)) {
+            logger.debug("Root storage location does not exist. Creating a new one.");
+            try {
+                Files.createDirectories(path);
+            } catch (final IOException e) {
+                final RuntimeException exc = new RuntimeException("Unable to create the root storage location.", e);
+                throw logger.throwing(exc);
+            }
+        }
+        return path;
     }
 
     @Override
