@@ -1,6 +1,8 @@
 package nmc.assignments.msassignment.controller.file;
 
 import nmc.assignments.msassignment.service.FileListingService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.server.WebServerException;
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,8 @@ import static nmc.assignments.msassignment.config.FileServicesConfig.ENDPOINTS_R
 
 @RestController
 public class FileListingController {
+    private static final Logger logger = LogManager.getLogger(FileListingController.class);
+
     @Autowired
     private FileListingService fileListingService;
 
@@ -23,7 +27,9 @@ public class FileListingController {
             return new ResponseEntity<>(fileListingService.listAllFiles(), HttpStatus.OK);
 
         } catch (final Exception e) {
-            throw new WebServerException("Failed to list contents of storage directory. An I/O error occurred: " + e.getMessage(), e);
+            logger.catching(e);
+            final WebServerException exc = new WebServerException("Failed to list contents of storage directory. An I/O error occurred: " + e.getMessage(), e);
+            throw logger.throwing(exc);
         }
     }
 }

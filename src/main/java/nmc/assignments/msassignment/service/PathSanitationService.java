@@ -1,7 +1,11 @@
 package nmc.assignments.msassignment.service;
 
-public interface PathSanitationService {
-    String sanitisePath(final String absolutePath);
+import java.nio.file.Path;
 
-    String sanitiseRelativePath(final String relativePath);
+public interface PathSanitationService {
+    Path sanitiseFile(String filename);
+
+    String sanitisePath(String absolutePath);
+
+    String sanitiseRelativePath(String relativePath);
 }

@@ -1,8 +1,10 @@
 package nmc.assignments.msassignment.config;
 
 import nmc.assignments.msassignment.service.FileDeletionService;
+import nmc.assignments.msassignment.service.FileDownloadService;
 import nmc.assignments.msassignment.service.FileListingService;
 import nmc.assignments.msassignment.service.impl.FileDeletionServiceImpl;
+import nmc.assignments.msassignment.service.impl.FileDownloadServiceImpl;
 import nmc.assignments.msassignment.service.impl.FileListingServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +16,11 @@ public class FileServicesConfig {
     @Bean
     public FileDeletionService fileDeletionService() {
         return new FileDeletionServiceImpl();
+    }
+
+    @Bean
+    public FileDownloadService fileDownloadService() {
+        return new FileDownloadServiceImpl();
     }
 
     @Bean
