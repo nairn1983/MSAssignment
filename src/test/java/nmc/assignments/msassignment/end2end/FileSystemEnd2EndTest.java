@@ -47,7 +47,7 @@ public class FileSystemEnd2EndTest {
     private static Path storageRoot;
 
     @DynamicPropertySource
-    private static void dynamicProperties(DynamicPropertyRegistry registry) {
+    private static void dynamicProperties(final DynamicPropertyRegistry registry) {
         registry.add("storage.location", () -> storageRoot.toString());
     }
 
@@ -367,6 +367,8 @@ public class FileSystemEnd2EndTest {
 
         final int firstFileStatus = firstFileFuture.get().andReturn().getResponse().getStatus();
         final int secondFileStatus = secondFileFuture.get().andReturn().getResponse().getStatus();
+
+        executorService.shutdown();
 
         // We expect that either an HTTP 201 is returned for the first file and an HTTP 409 for the second or vice versa
         final boolean firstFileWasUploaded = firstFileStatus == HttpStatus.CREATED.value() && secondFileStatus == HttpStatus.CONFLICT.value();

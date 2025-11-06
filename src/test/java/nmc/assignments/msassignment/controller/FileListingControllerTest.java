@@ -31,7 +31,7 @@ public class FileListingControllerTest {
     private FileListingService fileListingService;
 
     @ParameterizedTest
-    @ValueSource(ints = { 0, 1, 2 })
+    @ValueSource(ints = {0, 1, 2})
     public void shouldReturnHttp200WhenFilepathIsValid(final int numberOfFiles) throws Exception {
         // Arrange
         // Mock a list of filenames of size numberOfFiles, that the fileListingService will return
@@ -55,6 +55,6 @@ public class FileListingControllerTest {
         doThrow(IOException.class).when(fileListingService).listAllFiles();
 
         // Act, assert
-        assertThrows(WebServerException.class,  () -> fileListingController.listAllFiles());
+        assertThrows(WebServerException.class, () -> fileListingController.listAllFiles());
     }
 }

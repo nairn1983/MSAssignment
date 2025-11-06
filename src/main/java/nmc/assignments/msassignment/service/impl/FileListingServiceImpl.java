@@ -30,7 +30,7 @@ public class FileListingServiceImpl implements FileListingService {
 
         } catch (final IllegalStateException e) {
             logger.catching(e);
-            final IOException exc =  new IOException("An exception occurred when listing files.", e);
+            final IOException exc = new IOException("An exception occurred when listing files.", e);
             throw logger.throwing(exc);
         }
     }

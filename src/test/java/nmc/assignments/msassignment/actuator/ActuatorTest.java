@@ -21,7 +21,7 @@ public class ActuatorTest {
     private MockMvc mvc;
 
     @ParameterizedTest
-    @ValueSource(strings = { "health", "info", "prometheus" })
+    @ValueSource(strings = {"health", "info", "prometheus"})
     public void actuatorRequestShouldBeUnauthorized_whenNotAuthenticated(final String endpoint) throws Exception {
         mvc.perform(get("/actuator/" + endpoint))
             .andExpect(status().isUnauthorized());
