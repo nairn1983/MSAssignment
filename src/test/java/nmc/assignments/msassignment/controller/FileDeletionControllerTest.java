@@ -35,12 +35,12 @@ public class FileDeletionControllerTest {
         "../",
         ""
     })
-    public void shouldReturnHttp200WhenFilepathIsValid(final String filepath) {
+    public void shouldReturnHttp204WhenFilepathIsValid(final String filepath) {
         // Act
         final ResponseEntity<?> responseEntity = fileDeletionController.deleteFile(filepath);
 
         // Assert
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
     }
 
     @ParameterizedTest

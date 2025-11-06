@@ -27,7 +27,7 @@ public class FileDeletionController {
         final String relativePath = filepath.startsWith("/") ? filepath.substring(1) : filepath;
         try {
             fileDeletionService.deleteFile(relativePath);
-            return new ResponseEntity<>(null, HttpStatus.OK);
+            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
 
         } catch (final IOException e) {
             logger.catching(e);
