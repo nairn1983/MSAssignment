@@ -3,6 +3,8 @@ package nmc.assignments.msassignment.entity;
 import lombok.Getter;
 import org.springframework.core.io.Resource;
 
+import java.util.Objects;
+
 @Getter
 public class DownloadedFileInformation {
     private final String contentType;
@@ -25,5 +27,17 @@ public class DownloadedFileInformation {
             ", resource=" + resource +
             ", size=" + size +
             '}';
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        final DownloadedFileInformation that = (DownloadedFileInformation) o;
+        return size == that.size && Objects.equals(contentType, that.contentType) && Objects.equals(filename, that.filename) && Objects.equals(resource, that.resource);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(contentType, filename, resource, size);
     }
 }

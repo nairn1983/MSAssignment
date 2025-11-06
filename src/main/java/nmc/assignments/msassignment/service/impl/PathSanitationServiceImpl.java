@@ -4,6 +4,7 @@ import nmc.assignments.msassignment.service.PathSanitationService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -12,7 +13,7 @@ public class PathSanitationServiceImpl implements PathSanitationService {
     private static final Logger logger = LogManager.getLogger(PathSanitationServiceImpl.class);
 
     @Override
-    public Path sanitiseFile(final String absolutePath, final String relativePath) {
+    public Path sanitiseFile(final String absolutePath, final String relativePath) throws FileNotFoundException {
         final Path fullPath = Paths.get(absolutePath);
 
         if (Files.isDirectory(fullPath)) {
@@ -21,7 +22,7 @@ public class PathSanitationServiceImpl implements PathSanitationService {
         }
 
         if (!Files.exists(fullPath)) {
-            final IllegalArgumentException exc = new IllegalArgumentException("The file " + relativePath + " does not exist.");
+            final FileNotFoundException exc = new FileNotFoundException("The file " + relativePath + " does not exist.");
             throw logger.throwing(exc);
         }
 

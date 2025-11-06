@@ -3,12 +3,12 @@ package nmc.assignments.msassignment.service.impl;
 import nmc.assignments.msassignment.entity.DownloadedFileInformation;
 import nmc.assignments.msassignment.service.FileDownloadService;
 import nmc.assignments.msassignment.service.PathSanitationService;
+import nmc.assignments.msassignment.service.ResourceService;
 import nmc.assignments.msassignment.service.StorageLocationService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +25,9 @@ public class FileDownloadServiceImpl implements FileDownloadService {
     private PathSanitationService pathSanitationService;
 
     @Autowired
+    private ResourceService resourceService;
+
+    @Autowired
     private StorageLocationService storageLocationService;
 
     @Override
@@ -32,10 +35,7 @@ public class FileDownloadServiceImpl implements FileDownloadService {
         logger.info("Downloading file {}", relativePath);
 
         final Path path = resolveFilename(relativePath);
-        final Resource resource = new UrlResource(path.toUri());
-        if (!resource.exists() || !resource.isReadable()) {
-            throw new FileNotFoundException(relativePath);
-        }
+        final Resource resource = resourceService.getUrlResourceFromPath(path, relativePath);
 
         String contentType = Files.probeContentType(path);
         if (contentType == null) {
@@ -53,7 +53,7 @@ public class FileDownloadServiceImpl implements FileDownloadService {
             fileSize);
     }
 
-    private Path resolveFilename(final String filename) {
+    private Path resolveFilename(final String filename) throws FileNotFoundException {
         final String fullPathFilename = storageLocationService.getAbsolutePath(filename);
         return pathSanitationService.sanitiseFile(fullPathFilename, filename);
     }
