@@ -1,6 +1,6 @@
 package nmc.assignments.msassignment.service.impl;
 
-import nmc.assignments.msassignment.entity.FileInformation;
+import nmc.assignments.msassignment.entity.UploadedFileInformation;
 import nmc.assignments.msassignment.service.FileUploadService;
 import nmc.assignments.msassignment.service.StorageLocationService;
 import org.apache.logging.log4j.LogManager;
@@ -8,13 +8,17 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import static nmc.assignments.msassignment.config.FileServicesConfig.ENDPOINTS_ROOT;
 
 @Service
 public class FileUploadServiceImpl implements FileUploadService {
@@ -24,7 +28,7 @@ public class FileUploadServiceImpl implements FileUploadService {
     private StorageLocationService storageLocationService;
 
     @Override
-    public FileInformation uploadFile(final String relativePath, final MultipartFile file) throws IOException {
+    public UploadedFileInformation uploadFile(final String relativePath, final MultipartFile file) throws IOException {
         final String originalFilename = file.getOriginalFilename();
         String fullRelativePath = relativePath.endsWith("/")
             ? relativePath + originalFilename // relativePath is a directory - we will store using the same filename
@@ -55,15 +59,27 @@ public class FileUploadServiceImpl implements FileUploadService {
             Files.copy(inputStream, path);
         }
 
-        final FileInformation fileInformation = createFileInformation(path);
-        logger.debug("Copied file {}. Returning {}.", fullRelativePath, fileInformation);
+        final UploadedFileInformation uploadedFileInformation = createFileInformation(path);
+        logger.debug("Copied file {}. Returning {}.", fullRelativePath, uploadedFileInformation);
 
-        return fileInformation;
+        return uploadedFileInformation;
     }
 
-    private FileInformation createFileInformation(final Path path) throws IOException {
+    @Override
+    public URI createUriFromUploadedFile(
+        final UploadedFileInformation uploadedFileInformation,
+        final String relativePath) {
+
+        return ServletUriComponentsBuilder.fromCurrentContextPath()
+            .path(ENDPOINTS_ROOT + "/download/")
+            .path(relativePath)
+            .build()
+            .toUri();
+    }
+
+    private UploadedFileInformation createFileInformation(final Path path) throws IOException {
         final String relativePath = storageLocationService.getRelativePath(path.toString());
-        return new FileInformation(
+        return new UploadedFileInformation(
             Files.probeContentType(path),
             path.getFileName().toString(),
             relativePath,

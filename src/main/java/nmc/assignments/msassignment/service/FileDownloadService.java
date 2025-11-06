@@ -1,7 +1,9 @@
 package nmc.assignments.msassignment.service;
 
-import java.nio.file.Path;
+import nmc.assignments.msassignment.entity.DownloadedFileInformation;
+
+import java.io.IOException;
 
 public interface FileDownloadService {
-    Path resolveFilename(String filename);
+    DownloadedFileInformation downloadFile(String relativePath) throws IOException;
 }

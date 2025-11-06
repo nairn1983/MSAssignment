@@ -24,13 +24,14 @@ public class FileDeletionController {
 
     @DeleteMapping(ENDPOINTS_ROOT + "/delete/{*filepath}")
     public ResponseEntity<?> deleteFile(@PathVariable final String filepath) {
+        final String relativePath = filepath.startsWith("/") ? filepath.substring(1) : filepath;
         try {
-            fileDeletionService.deleteFile(filepath);
+            fileDeletionService.deleteFile(relativePath);
             return new ResponseEntity<>(null, HttpStatus.OK);
 
         } catch (final IOException e) {
             logger.catching(e);
-            final WebServerException exc = new WebServerException("Received I/O exception when deleting file " + filepath, e);
+            final WebServerException exc = new WebServerException("Received I/O exception when deleting file " + relativePath, e);
             throw logger.throwing(exc);
 
         } catch (final IllegalArgumentException e) {

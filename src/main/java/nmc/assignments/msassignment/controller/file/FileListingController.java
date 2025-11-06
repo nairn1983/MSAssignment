@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.List;
 
 import static nmc.assignments.msassignment.config.FileServicesConfig.ENDPOINTS_ROOT;
@@ -26,7 +27,7 @@ public class FileListingController {
         try {
             return new ResponseEntity<>(fileListingService.listAllFiles(), HttpStatus.OK);
 
-        } catch (final Exception e) {
+        } catch (final IOException e) {
             logger.catching(e);
             final WebServerException exc = new WebServerException("Failed to list contents of storage directory. An I/O error occurred: " + e.getMessage(), e);
             throw logger.throwing(exc);

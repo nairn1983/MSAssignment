@@ -2,6 +2,8 @@ package nmc.assignments.msassignment.service.impl;
 
 import nmc.assignments.msassignment.service.FileListingService;
 import nmc.assignments.msassignment.service.StorageLocationService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,13 +16,23 @@ import java.util.List;
 
 @Service
 public class FileListingServiceImpl implements FileListingService {
+    private static final Logger logger = LogManager.getLogger(FileListingServiceImpl.class);
+
     @Autowired
     private StorageLocationService storageLocationService;
 
     @Override
-    public List<String> listAllFiles() {
+    public List<String> listAllFiles() throws IOException {
         final Path storageDirectory = storageLocationService.getStorageLocationPath();
-        return listFilesInDirectory(storageDirectory, "/");
+
+        try {
+            return listFilesInDirectory(storageDirectory, "/");
+
+        } catch (final IllegalStateException e) {
+            logger.catching(e);
+            final IOException exc =  new IOException("An exception occurred when listing files.", e);
+            throw logger.throwing(exc);
+        }
     }
 
     private List<String> listFilesInDirectory(final Path directory, final String prefix) {
@@ -44,7 +56,8 @@ public class FileListingServiceImpl implements FileListingService {
             }).forEach(filenames::addAll);
 
         } catch (final IOException e) {
-            throw new RuntimeException(e);
+            logger.catching(e);
+            throw new IllegalStateException(e);
         }
 
         return filenames;

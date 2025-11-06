@@ -1,6 +1,6 @@
 package nmc.assignments.msassignment.controller.file;
 
-import nmc.assignments.msassignment.entity.FileInformation;
+import nmc.assignments.msassignment.entity.UploadedFileInformation;
 import nmc.assignments.msassignment.service.FileUploadService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URI;
@@ -31,22 +30,18 @@ public class FileUploadController {
 
     @PostMapping(value = ENDPOINTS_ROOT + "/upload/{*filepath}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadFile(@PathVariable String filepath, @RequestPart("file") MultipartFile file) {
+        final String relativePath = filepath.startsWith("/") ? filepath.substring(1) : filepath;
         try {
-            final FileInformation fileInformation = fileUploadService.uploadFile(filepath, file);
-
-            final URI locationUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path(ENDPOINTS_ROOT + "/download/")
-                .path(filepath)
-                .build()
-                .toUri();
+            final UploadedFileInformation uploadedFileInformation = fileUploadService.uploadFile(relativePath, file);
+            final URI locationUri = fileUploadService.createUriFromUploadedFile(uploadedFileInformation, relativePath);
 
             return ResponseEntity.created(locationUri)
-                .body(fileInformation);
+                .body(uploadedFileInformation);
 
         } catch (final FileAlreadyExistsException e) {
             logger.catching(e);
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body("The file " + e.getMessage() + " already exists");
+                .body("The file " + relativePath + " already exists");
 
         } catch (final IllegalArgumentException e) {
             logger.catching(e);
@@ -54,7 +49,7 @@ public class FileUploadController {
 
         } catch (final IOException e) {
             logger.catching(e);
-            final WebServerException exc = new WebServerException("Received I/O exception when downloading file " + filepath, e);
+            final WebServerException exc = new WebServerException("Received I/O exception when downloading file " + relativePath, e);
             throw logger.throwing(exc);
 
         }

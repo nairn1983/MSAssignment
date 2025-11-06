@@ -1,12 +1,12 @@
 package nmc.assignments.msassignment.controller.file;
 
+import nmc.assignments.msassignment.entity.DownloadedFileInformation;
 import nmc.assignments.msassignment.service.FileDownloadService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.server.WebServerException;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -17,9 +17,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 import static nmc.assignments.msassignment.config.FileServicesConfig.ENDPOINTS_ROOT;
 
@@ -36,22 +35,13 @@ public class FileDownloadController {
         logger.info("Downloading file {}", relativePath);
 
         try {
-            final Path path = fileDownloadService.resolveFilename(relativePath);
-            final Resource resource = new UrlResource(path.toUri());
-            if (!resource.exists() || !resource.isReadable()) {
-                logger.warn("File {} does not exist or is not readable", relativePath);
-                return ResponseEntity.notFound().build();
-            }
+            final DownloadedFileInformation fileInformation = fileDownloadService.downloadFile(relativePath);
 
-            String contentType = Files.probeContentType(path);
-            if (contentType == null) {
-                contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
-                logger.debug("File content type was not found. Defaulting to {}", contentType);
-            }
-
+            final String contentType = fileInformation.getContentType();
             final MediaType mediaType = MediaType.parseMediaType(contentType);
-            final String filename = path.getFileName().toString();
-            final long fileSize = Files.size(path);
+            final String filename = fileInformation.getFilename();
+            final long fileSize = fileInformation.getSize();
+            final Resource resource = fileInformation.getResource();
 
             logger.info("Ready to download file {}", relativePath);
             return ResponseEntity.ok()
@@ -64,6 +54,11 @@ public class FileDownloadController {
                         .build()
                         .toString())
                 .body(resource);
+
+        } catch (final FileNotFoundException e) {
+            logger.catching(e);
+            logger.warn("File {} does not exist or is not readable", relativePath);
+            return ResponseEntity.notFound().build();
 
         } catch (final IOException e) {
             logger.catching(e);
