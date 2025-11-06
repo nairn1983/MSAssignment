@@ -43,7 +43,6 @@ public class FileDownloadServiceImpl implements FileDownloadService {
             logger.debug("File content type was not found. Defaulting to {}", contentType);
         }
 
-        final MediaType mediaType = MediaType.parseMediaType(contentType);
         final String filename = path.getFileName().toString();
         final long fileSize = Files.size(path);
 
