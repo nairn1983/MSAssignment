@@ -36,7 +36,7 @@ public class MultiPartEnd2EndTest {
     }
 
     @Test
-    public void shouldHandlePayloadTooLarge() throws Exception {
+    public void shouldHandlePayloadTooLarge() {
         // Upload a file that is too large for the 1KB limit -- this should result in an HTTP 413
         final byte[] bytes = new byte[2048];
 
