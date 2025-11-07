@@ -395,4 +395,48 @@ public class FileSystemEnd2EndTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").isEmpty());
     }
+
+    @Test
+    public void shouldPreventConcurrentDeletionOfTheSameFile() throws Exception {
+        // Upload a file -- attempt to handle a race condition by deleting it through two concurrent processes.
+        final MockMultipartFile firstFile = new MockMultipartFile("file", "testFile.txt", "text/plain", "Content of first file".getBytes());
+
+        mvc.perform(multipart(ENDPOINTS_ROOT + "/upload/uploadedFile.txt")
+            .file(firstFile)
+            .with(httpBasic(USER, PASS)));
+
+        final ExecutorService executorService = Executors.newFixedThreadPool(2);
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+        // Create a callable that will wait until the countdown latch is triggered before attempting to delete the file
+        final Callable<ResultActions> callable = () -> {
+            countDownLatch.await();
+            return mvc.perform(delete(ENDPOINTS_ROOT + "/delete/uploadedFile.txt")
+                    .with(httpBasic(USER, PASS)));
+        };
+
+        // Submit both callables to the thread pool
+        final Future<ResultActions> firstDeleteFuture = executorService.submit(callable);
+        final Future<ResultActions> secondDeleteFuture = executorService.submit(callable);
+
+        // Trigger both callables by releasing the countdown latch
+        countDownLatch.countDown();
+
+        final int firstDeleteStatus = firstDeleteFuture.get().andReturn().getResponse().getStatus();
+        final int secondDeleteStatus = secondDeleteFuture.get().andReturn().getResponse().getStatus();
+
+        executorService.shutdown();
+
+        // We expect that either an HTTP 204 is returned for the first deletion and an HTTP 404 for the second or vice versa
+        final boolean firstCallDeletedFile = firstDeleteStatus == HttpStatus.NO_CONTENT.value() && secondDeleteStatus == HttpStatus.NOT_FOUND.value();
+        final boolean secondCallDeleteFile = firstDeleteStatus == HttpStatus.NOT_FOUND.value() && secondDeleteStatus == HttpStatus.NO_CONTENT.value();
+
+        assertTrue(firstCallDeletedFile || secondCallDeleteFile);
+
+        // List -- confirm that the storage filesystem is empty
+        mvc.perform(get(ENDPOINTS_ROOT + "/list")
+                .with(httpBasic(USER, PASS)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$").isEmpty());
+    }
 }

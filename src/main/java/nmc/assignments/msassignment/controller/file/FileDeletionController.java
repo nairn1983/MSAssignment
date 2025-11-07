@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import static nmc.assignments.msassignment.config.FileServicesConfig.ENDPOINTS_ROOT;
@@ -28,6 +29,10 @@ public class FileDeletionController {
         try {
             fileDeletionService.deleteFile(relativePath);
             return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+
+        } catch (final FileNotFoundException e) {
+            logger.catching(e);
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 
         } catch (final IOException e) {
             logger.catching(e);
