@@ -138,7 +138,7 @@ public class FileDownloadControllerTest {
         "../",
         ""
     })
-    public void shouldReturnHttp403WhenServiceRaisesIllegalArgumentException(final String filepath) throws Exception {
+    public void shouldReturnHttp400WhenServiceRaisesIllegalArgumentException(final String filepath) throws Exception {
         // Arrange
         final String errorMessage = "Could not download file " + filepath;
         doThrow(new IllegalArgumentException(errorMessage)).when(fileDownloadService)
@@ -148,7 +148,7 @@ public class FileDownloadControllerTest {
         final ResponseEntity<?> responseEntity = fileDownloadController.downloadFile(filepath);
 
         // Assert
-        assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
         assertEquals(errorMessage, responseEntity.getBody());
     }
 }

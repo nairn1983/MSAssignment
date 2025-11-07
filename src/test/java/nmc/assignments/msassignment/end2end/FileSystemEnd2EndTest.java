@@ -409,15 +409,20 @@ public class FileSystemEnd2EndTest {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
 
         // Create a callable that will wait until the countdown latch is triggered before attempting to delete the file
-        final Callable<ResultActions> callable = () -> {
+        final Callable<ResultActions> callable1 = () -> {
             countDownLatch.await();
             return mvc.perform(delete(ENDPOINTS_ROOT + "/delete/uploadedFile.txt")
-                    .with(httpBasic(USER, PASS)));
+                .with(httpBasic(USER, PASS)));
+        };
+        final Callable<ResultActions> callable2 = () -> {
+            countDownLatch.await();
+            return mvc.perform(delete(ENDPOINTS_ROOT + "/delete/uploadedFile.txt")
+                .with(httpBasic(USER, PASS)));
         };
 
         // Submit both callables to the thread pool
-        final Future<ResultActions> firstDeleteFuture = executorService.submit(callable);
-        final Future<ResultActions> secondDeleteFuture = executorService.submit(callable);
+        final Future<ResultActions> firstDeleteFuture = executorService.submit(callable1);
+        final Future<ResultActions> secondDeleteFuture = executorService.submit(callable2);
 
         // Trigger both callables by releasing the countdown latch
         countDownLatch.countDown();
@@ -427,11 +432,7 @@ public class FileSystemEnd2EndTest {
 
         executorService.shutdown();
 
-        // We expect that either an HTTP 204 is returned for the first deletion and an HTTP 404 for the second or vice versa
-        final boolean firstCallDeletedFile = firstDeleteStatus == HttpStatus.NO_CONTENT.value() && secondDeleteStatus == HttpStatus.NOT_FOUND.value();
-        final boolean secondCallDeleteFile = firstDeleteStatus == HttpStatus.NOT_FOUND.value() && secondDeleteStatus == HttpStatus.NO_CONTENT.value();
-
-        assertTrue(firstCallDeletedFile || secondCallDeleteFile);
+        assertTrue(firstDeleteStatus == HttpStatus.NO_CONTENT.value() || secondDeleteStatus == HttpStatus.NO_CONTENT.value());
 
         // List -- confirm that the storage filesystem is empty
         mvc.perform(get(ENDPOINTS_ROOT + "/list")

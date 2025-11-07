@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
+import java.nio.file.NoSuchFileException;
 
 import static nmc.assignments.msassignment.config.FileServicesConfig.ENDPOINTS_ROOT;
 
@@ -30,7 +32,7 @@ public class FileDeletionController {
             fileDeletionService.deleteFile(relativePath);
             return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
 
-        } catch (final FileNotFoundException e) {
+        } catch (final AccessDeniedException | FileNotFoundException | NoSuchFileException e) {
             logger.catching(e);
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 
@@ -41,7 +43,7 @@ public class FileDeletionController {
 
         } catch (final IllegalArgumentException e) {
             logger.catching(e);
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }
