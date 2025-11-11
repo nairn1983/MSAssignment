@@ -15,11 +15,15 @@ port must be available.
 
 ## Installation and running the application
 
+### Default method
+
 The simplest way to run the application is to navigate to the root directory of the project and run it via Maven.
 
 ```
 mvn spring-boot:run
 ```
+
+### Direct JAR invokation
 
 It is also possible to build the application and run the resulting JAR directly. This can be run from the generated
 `target/` directory. However, the default storage filesystem will also be erased in this scenario. This can be
@@ -30,6 +34,21 @@ dedicated filesystem or directory.
 mvn clean install
 cd target
 java -jar MSAssignment-0.0.1-SNAPSHOT.jar
+```
+
+### Running using Docker
+
+The application can also be run from Docker. In order to do so, the following command can be run from the root directory
+of the project, creating an image for the application named `msassignment`.
+
+```
+docker build -t msassignment .
+```
+
+This image can then be run through the following command.
+
+```
+docker run --name msassignment -p 8080:8080 msassignment:latest
 ```
 
 ## API overview and authentication
