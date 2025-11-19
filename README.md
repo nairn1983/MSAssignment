@@ -23,7 +23,7 @@ The simplest way to run the application is to navigate to the root directory of 
 mvn spring-boot:run
 ```
 
-### Direct JAR invokation
+### Direct JAR invocation
 
 It is also possible to build the application and run the resulting JAR directly. This can be run from the generated
 `target/` directory. However, the default storage filesystem will also be erased in this scenario. This can be
